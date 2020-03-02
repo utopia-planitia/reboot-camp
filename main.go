@@ -7,7 +7,7 @@ import (
 	"os"
 	"time"
 
-	camp "github.com/utopia-planitia/reboot-camp/pkg"
+	roboot "github.com/utopia-planitia/roboot/pkg"
 )
 
 func main() {
@@ -18,19 +18,24 @@ func main() {
 }
 
 func run() error {
-	svc := camp.NewServer()
+	svc := roboot.NewServer()
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+		log.Printf("Defaulting to port %s", port)
+	}
 
 	// https://blog.cloudflare.com/exposing-go-on-the-internet/
 	s := &http.Server{
-		Addr:           ":8080",
+		Addr:           ":" + port,
 		Handler:        svc,
 		ReadTimeout:    10 * time.Second,
 		WriteTimeout:   10 * time.Second,
 		MaxHeaderBytes: 1 << 20,
 	}
 
-	log.Println("listen on :8080")
-	err := s.ListenAndServe()
+	log.Printf("Listening on port %s", port)
 
-	return err
+	return s.ListenAndServe()
 }
